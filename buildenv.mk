@@ -37,7 +37,9 @@ ifneq ($(words $(subst :, ,$(ROOT_DIR))), 1)
   $(error main directory cannot contain spaces nor colons)
 endif
 
-COMMON_DIR            := $(ROOT_DIR)/common
+RUST_SGX_SDK ?= ./rust-sgx-sdk
+
+COMMON_DIR            := $(ROOT_DIR)/$(RUST_SGX_SDK)/common
 
 CP    := /bin/cp -f
 MKDIR := mkdir -p
