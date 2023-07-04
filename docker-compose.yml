@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  hello-rust:
+    image: sgx-hello-rust:local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    devices:
+      - /dev/isgx
+    depends_on:
+      aesmd:
+        condition: service_started
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+
+  aesmd:
+    image: ghcr.io/initc3/sgx-aesm:2.19-buster-d271e64
+    volumes:
+      - aesmd-socket:/var/run/aesmd
+    devices:
+      - /dev/isgx
+
+
+volumes:
+  aesmd-socket:
+    driver: local
+    driver_opts:
+      type: "tmpfs"
+      device: "tmpfs"
+      o: "rw"
