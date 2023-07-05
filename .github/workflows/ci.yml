@@ -1,0 +1,43 @@
+name: Build Linux SGX SDK
+
+on:
+  push:
+    branches: [ main ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  enclave:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install nix from cachix
+        uses: cachix/install-nix-action@v21
+        with:
+          nix_path: nixpkgs=channel:23.05
+      - name: Install cachix
+        uses: cachix/cachix-action@v12
+        with:
+          name: gluonixpkgs
+          skipPush: true
+      - run: |
+          mkdir -p ~/.config/nixpkgs
+          touch ~/.config/nixpkgs/config.nix
+          echo "{ permittedInsecurePackages = [ \"openssl-1.1.1u\" ]; }" >> ~/.config/nixpkgs/config.nix
+      - run: nix --version
+      - run: nix build --impure .?submodules=1#enclave
+      - run: nix build --impure --rebuild .?submodules=1#enclave
+      - run: nix flake check --impure
+      - run: nix flake metadata
+      - run: nix flake show
+
+      - name: Install auditee
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - run: pip install git+https://github.com/initc3/auditee.git
+      - run: auditee mrenclave --signed-binary result/bin/enclave.signed.so
