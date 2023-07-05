@@ -39,5 +39,6 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-      - run: pip install git+https://github.com/initc3/auditee.git
+      - run: echo "git+https://github.com/initc3/auditee.git" >> requirements.txt
+      - run: pip install -r requirements.txt
       - run: auditee mrenclave --signed-binary result/bin/enclave.signed.so
