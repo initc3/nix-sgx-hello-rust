@@ -34,10 +34,23 @@ jobs:
       - run: nix flake metadata
       - run: nix flake show
 
-      - name: Install auditee
-        uses: actions/setup-python@v4
+      #- name: Install auditee
+      #  uses: actions/setup-python@v4
+      #  with:
+      #    python-version: '3.11'
+      #    cache: 'pip'
+      #- run: pip install -r requirements.txt
+      #- run: auditee mrenclave --signed-binary result/bin/enclave.signed.so
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Build docker image
+        uses: docker/build-push-action@v4
         with:
-          python-version: '3.11'
-          cache: 'pip'
-      - run: pip install -r requirements.txt
-      - run: auditee mrenclave --signed-binary result/bin/enclave.signed.so
+          context: .
+          file: auditee.Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          tags: auditee:local
+        run: |
+          docker run --rm -it -v $PWD/result/bin:/usr/src/ -w /urs/src auditee:local auditee mrenclave --signed-binary /usr/src/enclave.signed.so
