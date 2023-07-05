@@ -3,7 +3,9 @@
 
   inputs = {
     nixpkgs.url = "github:sbellem/nixpkgs/20ff746c79c5f0c10b8c4aa8e0b441e0b0ebd034";
-    flake-utils.url = "github:numtide/flake-utils";
+    flake-utils = {
+      url = "github:numtide/flake-utils";
+    };
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
       inputs.flake-utils.follows = "flake-utils";
